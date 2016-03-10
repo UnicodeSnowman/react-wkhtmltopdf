@@ -3,14 +3,16 @@ import ReactDOM from 'react-dom';
 import Form from './form';
 
 const formData = {
-    firstName: '',
-    lastName: '',
-    address: '',
-    occupation: '',
-    company: '',
-    interests: [''],
-    friends: ['']
+    name: '',
+    things: ['']
 };
+
+// NOTE: This is for example purposes only. You reeeally
+// shouldn't be making service calls from your components.
+//
+// (ideally you shouldn't even be maintaining state at the
+// component level. Use https://github.com/reactjs/redux or
+// some other state container)
 
 class App extends React.Component {
     constructor() {
@@ -48,10 +50,7 @@ class App extends React.Component {
           headers: {
               'Content-Type': 'application/json'
           },
-          body: this.state
-        })
-        .then(() => {
-            console.log('TODO REDIRECT');
+          body: JSON.stringify(this.state)
         });
     }
 
