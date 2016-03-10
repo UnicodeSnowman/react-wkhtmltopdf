@@ -1,0 +1,238 @@
+<!doctype html>
+<html lang="en">
+
+	<head>
+		<meta charset="utf-8">
+
+		<title>Universal/Isomorphic PDF Rendering with React.JS</title>
+
+		<meta name="description" content="A framework for easily creating beautiful presentations using HTML">
+		<meta name="author" content="Hakim El Hattab">
+
+		<meta name="apple-mobile-web-app-capable" content="yes">
+		<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+
+		<link rel="stylesheet" href="css/reveal.css">
+		<link rel="stylesheet" href="css/theme/black.css" id="theme">
+
+		<!-- Code syntax highlighting -->
+		<link rel="stylesheet" href="lib/css/zenburn.css">
+
+		<!-- Printing and PDF exports -->
+		<script>
+			var link = document.createElement( 'link' );
+			link.rel = 'stylesheet';
+			link.type = 'text/css';
+			link.href = window.location.search.match( /print-pdf/gi ) ? 'css/print/pdf.css' : 'css/print/paper.css';
+			document.getElementsByTagName( 'head' )[0].appendChild( link );
+		</script>
+
+		<!--[if lt IE 9]>
+		<script src="lib/js/html5shiv.js"></script>
+		<![endif]-->
+	</head>
+
+	<body>
+
+		<div class="reveal">
+
+			<!-- Any section element inside of this container is displayed as a slide -->
+			<div class="slides">
+				<section>
+					<h2>Universal PDF Rendering with React.JS</h2>
+					<h5 class="fragment">(Universal === Isomorphic === Whatever)</h5>
+					<p>
+						<small><a href="http://caplinger.me">chris caplinger</a> / <a href="http://twitter.com/unicode_snowman">@unicode_snowman</a></small>
+					</p>
+				</section>
+
+				<section>
+					<h1 style="font-size: 400px;">P D F</h1>
+				</section>
+
+				<section>
+                    <ul>
+                        <li>prawn?</li>
+                        <li class="fragment">pypdf?</li>
+                        <li class="fragment">iText?</li>
+                        <li class="fragment">clj-pdf?</li>
+                        <li class="fragment">PDFClown??</li>
+                        <li class="fragment" style="list-style: none;">^^^ Is that a real thing?</li>
+                        <li class="fragment" style="list-style: none;">...mostly imperative, programmatic</li>
+                        <li class="fragment" style="list-style: none;">...another complex API to learn</li>
+                    </ul>
+				</section>
+
+                <section>
+                    <h2>What about HTML/CSS?</h2>
+				</section>
+
+                <section>
+                    <h1>wktmltopdf</h1>
+                    <p class="fragment">HTML → PDF</p>
+                    <pre class="fragment"><code class="hljs">const wkhtmltopdf = require('wkhtmltopdf');
+const fs = require('fs');
+const domFragment = `
+    <div>
+        <label>Name: <input type="text"></label>
+    </div>
+`;
+
+wkhtmltopdf(domFragment)
+    .pipe(fs.createWriteStream('public/my-new-pdf.pdf'));</code></pre>
+                </section>
+
+                <section>
+                    <h1>React.JS</h1>
+                    <p class="fragment">.renderToStaticMarkup(...)</p>
+                    <pre class="fragment"><code class="hljs">const ReactDOMServer = require('react-dom/server');
+const MyForm = require('./my-form');
+
+ReactDOMServer.renderToStaticMarkup(&lt;MyForm data={...}&gt;&lt;/MyForm&gt;);</code></pre>
+                </section>
+
+                <section>
+                    <p>...sans JSX</p>
+                    <pre><code class="hljs">const ReactDOMServer = require('react-dom/server');
+const React = require('react');
+const MyForm = require('./my-form');
+const FormComponent = React.createElement(MyForm, { data: ... });
+
+ReactDOMServer.renderToStaticMarkup(FormComponent);</code></pre>
+                </section>
+
+                <section>
+                    <h1>WINS</h1>
+                    <ul>
+                        <li class="fragment">Fewer concepts to learn!</li>
+                        <li class="fragment">Same code!<span class="fragment"> ...maybe a print stylesheet</span></li>
+                    </ul>
+                </section>
+
+                <section>
+                    <h1>Sample Code</h1>
+                </section>
+
+                <section>
+                    <p>webpack.config.js</p>
+                    <pre><code class="hljs" style="font-size: 20px; line-height: 20px;">module.exports = [
+    {
+        entry: './app.js',
+        output: {
+            path: './public/build',
+            filename: 'client-bundle.js',
+        },
+        module: {...}
+    },
+    {
+        entry: './form.js',
+        output: {
+            path: './public/build',
+            filename: 'server-bundle.js',
+            libraryTarget: 'commonjs2'
+        },
+        target: 'node',
+        module: {...}
+    }
+];
+                    </code></pre>
+                </section>
+
+                <section>
+                    <p>form.js</p>
+                    <pre><code class="hljs" style="font-size: 20px; line-height: 20px;">import React form 'react';
+
+export default class Form extends React.Component {
+    render() {
+        return <div>...</div>;
+    }
+}</code></pre>
+                </section>
+
+                <section>
+                    <p>app.js</p>
+                    <pre><code class="hljs" style="font-size: 20px; line-height: 20px;">import ReactDOM from 'react-dom';
+import Form from './form';
+
+const initialFormData = {...}
+
+export default class App extends React.Component {
+    constructor() {
+        super();
+        this.state = initialFormData;
+    }
+
+    render() {
+        return &lt;Form data={this.state}&gt;&lt;/Form&gt;;
+    }
+}
+
+ReactDOM.render(&lt;App&gt;&lt;/App&gt;, document.getElementById('app'));&lt;/code&gt;&lt;/pre&gt;);</code></pre>
+                </section>
+
+                <section>
+                    <p>server.js</p>
+                    <pre><code class="hljs" style="font-size: 18px; line-height: 20px;">const app = require('express')();
+const fs = require('fs');
+const React = require('react');
+const ReactDOMServer = require('react-dom/server');
+const wkhtmltopdf = require('wkhtmltopdf');
+
+app.post('/forms', function(req, res) {
+    const FormComponent = React.createElement(Form, { data: req.body });
+
+    wkhtmltopdf(
+        ReactDOMServer.renderToStaticMarkup(FormComponent), {
+            userStyleSheet: 'public/form.css', 
+            printMediaType: true 
+        })
+        .pipe(fs.createWriteStream('public/generated.pdf'));
+});
+
+app.listen(PORT, function() {
+    console.log('listening on port:', 8080);
+});
+                    </code></pre>
+                </section>
+                <section>
+                    <p>Questions?</p>
+					<p>
+                        <small><a href="http://caplinger.me">chris caplinger</a> / <a href="mailto:caplingerc@gmail.com">caplingerc@gmail.com</a> / <a href="http://twitter.com/unicode_snowman">@unicode_snowman</a></small>
+					</p>
+                </section>
+			</div>
+
+		</div>
+
+		<script src="lib/js/head.min.js"></script>
+		<script src="js/reveal.js"></script>
+
+		<script>
+
+			// Full list of configuration options available at:
+			// https://github.com/hakimel/reveal.js#configuration
+			Reveal.initialize({
+				controls: true,
+				progress: true,
+				history: true,
+				center: true,
+
+				transition: 'slide', // none/fade/slide/convex/concave/zoom
+
+				// Optional reveal.js plugins
+				dependencies: [
+					{ src: 'lib/js/classList.js', condition: function() { return !document.body.classList; } },
+					{ src: 'plugin/markdown/marked.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/markdown/markdown.js', condition: function() { return !!document.querySelector( '[data-markdown]' ); } },
+					{ src: 'plugin/highlight/highlight.js', async: true, callback: function() { hljs.initHighlightingOnLoad(); } },
+					{ src: 'plugin/zoom-js/zoom.js', async: true },
+					{ src: 'plugin/notes/notes.js', async: true }
+				]
+			});
+
+		</script>
+
+	</body>
+</html>
