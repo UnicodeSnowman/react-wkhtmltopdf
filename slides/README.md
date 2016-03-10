@@ -1,3 +1,5 @@
-## Universal PDF Generation with React.JS
+## Universal PDF Rendering with React.JS
 
-Slides built with Reveal.JS
+Slides for CompStak / Hightower Meet & Greet - March 2016
+
+Built with Reveal.JS
